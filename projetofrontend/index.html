@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rumo à Liberdade Financeira</title>
+    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <main class="hero-section">
+        <div class="hero-content">
+            <h1>Rumo à Liberdade Financeira</h1>
+            <p>O guia prático para você dominar suas finanças e realizar seus sonhos</p>
+        </div>
+        <section class="main-container">
+            <div class="image-placeholder">
+            </div>
+            <div class="side-content">
+                
+                <div id="saldo-atual-container">
+                    <p>Saldo Atual:</p>
+                    <span id="saldo-atual">R$ 0,00</span> 
+                </div>
+
+                <form id="form-transacao">
+                    <h3>Nova Transação</h3>
+
+                    <div class="input-group">
+                        <label for="descricao">Descrição:</label>
+                        <input type="text" id="descricao" name="descricao" required placeholder="Ex: Salário, Aluguel, Supermercado">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="valor">Valor (R$):</label>
+                        <input type="number" id="valor" name="valor" step="0.01" required placeholder="Ex: 1500.00">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="data">Data:</label>
+                        <input type="date" id="data" name="data" required>
+                    </div>
+                    <div class="input-group type-group">
+                        <label>Tipo:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <div>
+                                <input type="radio" id="entrada" name="tipo" value="receita" checked>
+                                <label for="entrada" class="receita-label">Entrada</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="saida" name="tipo" value="despesa">
+                                <label for="saida" class="despesa-label">Saída</label>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <button type="submit" class="cta-submit">Adicionar</button>
+                </form>
+
+            </div>
+        </section>
+    </main>
+    <script>
+        
+ var CHAVE_DADOS = 'financas_usuario_dados';
+ let listaTransacoes = []; 
+
+        const inputData = document.getElementById('data');
+
+function carregarDadosSalvos() {
+ const dados = localStorage.getItem(CHAVE_DADOS);
+ return dados ? JSON.parse(dados) : [];
+ }
+
+ function salvarDadosNoStorage() {
+ localStorage.setItem(CHAVE_DADOS, JSON.stringify(listaTransacoes));
+ }
+ function formatarParaBRL(valor) {
+ return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+ }
+
+ function calcularTotal() {
+ let total = 0;
+ 
+ listaTransacoes.forEach(t => {
+ const valor_transacao = parseFloat(t.valor);
+ 
+ total += (t.tipo === 'receita' ? valor_transacao : -valor_transacao);
+ });
+ return total;
+ }
+        
+ function atualizarTela() {
+            var saldoFinal = calcularTotal(); 
+            
+            saldoAtualEl.textContent = formatarParaBRL(saldoFinal); 
+            
+            saldoAtualEl.classList.remove('receita', 'despesa');
+            if (saldoFinal >= 0) {
+                saldoAtualEl.classList.add('receita'); 
+            } else {
+                saldoAtualEl.classList.add('despesa'); 
+            }
+ }
+ function adicionarTransacao(event) {
+ event.preventDefault();
+
+ const form = event.target;
+            
+            var valorInput = Number(form.valor.value); 
+            
+            if (form.descricao.value.trim() === "") {
+                alert("A descrição da transação é obrigatória.");
+                return;
+            }
+
+            if (isNaN(valorInput) || valorInput <= 0) {
+                alert("Por favor, insira um valor positivo válido.");
+                return;
+            }
+ const novaTransacao = {
+ id: Date.now().toString(), 
+ descricao: form.descricao.value.trim(),
+ valor: valorInput,
+ tipo: form.tipo.value, 
+ data: form.data.value, 
+ };
+ listaTransacoes.push(novaTransacao);
+ salvarDadosNoStorage();
+ atualizarTela();
+ form.reset();
+ inputData.valueAsDate = new Date(); 
+ }
+ document.addEventListener('DOMContentLoaded', () => {  
+            formTransacao = document.getElementById('form-transacao');
+            saldoAtualEl = document.getElementById('saldo-atual'); 
+ 
+             listaTransacoes = carregarDadosSalvos();
+ 
+ inputData.valueAsDate = new Date();
+ atualizarTela(); 
+ formTransacao.addEventListener('submit', adicionarTransacao);
+ });
+ </script>
+</body>
+</html>
